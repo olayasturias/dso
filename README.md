@@ -96,8 +96,6 @@ See [https://github.com/JakobEngel/dso_ros](https://github.com/JakobEngel/dso_ro
 how the library can be used from another project. It should be straight forward to implement extentions for 
 other camera drivers, to use DSO interactively without ROS.
 
-
-
 #### 3.1 Dataset Format.
 The format assumed is that of [https://vision.in.tum.de/mono-dataset](https://vision.in.tum.de/mono-dataset).
 However, it should be easy to adapt it to your needs, if required. The binary is run with:
@@ -239,7 +237,18 @@ using the TUM RGB-D / TUM monoVO format ([timestamp x y z qx qy qz qw] of the ca
 - see `settings.cpp` for a LOT of settings parameters. Most of which you shouldn't touch.
 - `setGlobalCalib(...)` needs to be called once before anything is initialized, and globally sets the camera intrinsics and video resolution for convenience. probably not the most portable way of doing this though.
 
+#### 3.6 Examples
 
+We provide example files to run DSO on the dataset [MIMIR-UW](https://github.com/remaro-network/MIMIR-UW).
+You can directly use the script `./run_dso` in the root directory as:
+
+		./run_dso <environment_name> <track_name> <camera_name>
+
+For example:
+
+		./run_dso SeaFloor track0 cam0
+
+Note that you will need to change the root directory in the script to point to the folder where you have downloaded the dataset.
 
 
 ### 4 General Notes for Good Results

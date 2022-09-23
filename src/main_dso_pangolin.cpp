@@ -515,12 +515,14 @@ int main( int argc, char** argv )
                     fullSystem->outputWrapper = wraps;
 
                     setting_fullResetRequested=false;
+					fullSystem->printResult("result.txt");
                 }
             }
 
             if(fullSystem->isLost)
             {
                     printf("LOST!!\n");
+					fullSystem->printResult("result.txt");
                     break;
             }
 

@@ -14,19 +14,19 @@ set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
 
 # required libraries
 find_package(SuiteParse REQUIRED)
-find_package(Eigen3 REQUIRED)
+find_package(Eigen3 3.4.0 REQUIRED)
 find_package(Boost COMPONENTS system thread) 
 
 # optional libraries
 find_package(LibZip QUIET)
-find_package(Pangolin 0.2 QUIET)
+find_package(Pangolin 0.2 REQUIRED)
 find_package(OpenCV 3 QUIET)
 
 # flags
 add_definitions("-DENABLE_SSE")
 set(CMAKE_CXX_FLAGS
-   "${SSE_FLAGS} -O3 -g -std=c++11 -march=native"
-#   "${SSE_FLAGS} -O3 -g -std=c++11 -fno-omit-frame-pointer"
+   "${SSE_FLAGS} -O3 -g -std=c++0x -march=native"
+#   "${SSE_FLAGS} -O3 -g -std=c++0x -fno-omit-frame-pointer"
 )
 
 if (MSVC)

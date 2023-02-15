@@ -19,8 +19,8 @@ find_package(Boost COMPONENTS system thread)
 
 # optional libraries
 find_package(LibZip QUIET)
-find_package(Pangolin 0.2 REQUIRED)
-find_package(OpenCV 3 QUIET)
+find_package(Pangolin REQUIRED)
+find_package(OpenCV 4 QUIET)
 
 # flags
 add_definitions("-DENABLE_SSE")

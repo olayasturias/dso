@@ -26,6 +26,7 @@
 #pragma once
 #include "util/settings.h"
 #include "boost/thread.hpp"
+#include <boost/bind.hpp>
 #include <stdio.h>
 #include <iostream>
 
@@ -131,7 +132,7 @@ public:
 
 		nextIndex = 0;
 		maxIndex = 0;
-		this->callPerIndex = boost::bind(&IndexThreadReduce::callPerIndexDefault, this, _1, _2, _3, _4);
+		this->callPerIndex = boost::bind(&IndexThreadReduce::callPerIndexDefault, this, boost::placeholders::_1, boost::placeholders::_2, boost::placeholders::_3, boost::placeholders::_4);
 
 		//printf("reduce done (all threads finished)\n");
 	}

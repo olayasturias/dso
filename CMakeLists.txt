@@ -1,12 +1,19 @@
 SET(PROJECT_NAME DSO)
+set(CMAKE_VERBOSE_MAKEFILE ON)
+
+# On Mac, use gnu gcc over clang. Compiles slower and has missing LD simbols!?
+#set(CMAKE_C_COMPILER "gcc-12")
+#set(CMAKE_CXX_COMPILER "g++-12")
+# If ld can't find boost_system do: export LIBRARY_PATH=/opt/homebrew/lib
 
 PROJECT(${PROJECT_NAME})
-CMAKE_MINIMUM_REQUIRED(VERSION 2.6)
+CMAKE_MINIMUM_REQUIRED(VERSION 3.14)
 #set(CMAKE_VERBOSE_MAKEFILE ON)
 
+set(CMAKE_CXX_STANDARD 14)
 
-set(BUILD_TYPE Release)
-#set(BUILD_TYPE RelWithDebInfo)
+set(CMAKE_BUILD_TYPE Release)
+#set(CMAKE_BUILD_TYPE RelWithDebInfo)
 
 set(EXECUTABLE_OUTPUT_PATH bin)
 set(LIBRARY_OUTPUT_PATH lib)
@@ -14,18 +21,32 @@ set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
 
 # required libraries
 find_package(SuiteParse REQUIRED)
-find_package(Eigen3 3.4.0 REQUIRED)
+find_package(Eigen3 REQUIRED NO_MODULE)
 find_package(Boost COMPONENTS system thread) 
 
 # optional libraries
 find_package(LibZip QUIET)
-find_package(Pangolin REQUIRED)
-find_package(OpenCV 4 QUIET)
+find_package(Pangolin 0.8 QUIET)
+find_package(OpenCV QUIET)
 
 # flags
+if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin" AND CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+    if (${CMAKE_SYSTEM_PROCESSOR} MATCHES "arm64") # OSX
+	set(CPU_CXX_FLAG -mcpu=apple-m1)
+    else()
+    	set(CPU_CXX_FLAG -mcpu=x86_64)
+    endif()
+else()
+    if (${CMAKE_SYSTEM_PROCESSOR} MATCHES "armv7l") # OSX
+	set(CPU_CXX_FLAG "-march=native -mfpu=neon")
+    else()
+	set(CPU_CXX_FLAG -march=native)
+    endif()
+endif()
+
 add_definitions("-DENABLE_SSE")
 set(CMAKE_CXX_FLAGS
-   "${SSE_FLAGS} -O3 -g -std=c++0x -march=native"
+   "${SSE_FLAGS} -O3 -g -std=c++0x ${CPU_CXX_FLAG}"
 #   "${SSE_FLAGS} -O3 -g -std=c++0x -fno-omit-frame-pointer"
 )
 
@@ -48,7 +69,7 @@ set(dso_SOURCE_FILES
   ${PROJECT_SOURCE_DIR}/src/FullSystem/PixelSelector2.cpp
   ${PROJECT_SOURCE_DIR}/src/OptimizationBackend/EnergyFunctional.cpp
   ${PROJECT_SOURCE_DIR}/src/OptimizationBackend/AccumulatedTopHessian.cpp
-  ${PROJECT_SOURCE_DIR}/src/OptimizationBackend/AccumulatedSCHessian.cpp
+  ${PROJECT_SOURCE_DIR}/src/OptimizationBackend/AccumulatedSCHessian.cpp 
   ${PROJECT_SOURCE_DIR}/src/OptimizationBackend/EnergyFunctionalStructs.cpp
   ${PROJECT_SOURCE_DIR}/src/util/settings.cpp
   ${PROJECT_SOURCE_DIR}/src/util/Undistort.cpp
@@ -62,6 +83,7 @@ include_directories(
   ${PROJECT_SOURCE_DIR}/thirdparty/Sophus
   ${PROJECT_SOURCE_DIR}/thirdparty/sse2neon
   ${EIGEN3_INCLUDE_DIR}
+  ${PROJECT_SOURCE_DIR}/tests
 ) 
 
 
@@ -69,7 +91,7 @@ include_directories(
 if (Pangolin_FOUND)
 	message("--- found PANGOLIN, compiling dso_pangolin library.")
 	include_directories( ${Pangolin_INCLUDE_DIRS} ) 
-	set(dso_pangolin_SOURCE_FILES 
+	set(dso_pangolin_SOURCE_FILES
 	  ${PROJECT_SOURCE_DIR}/src/IOWrapper/Pangolin/KeyFrameDisplay.cpp
 	  ${PROJECT_SOURCE_DIR}/src/IOWrapper/Pangolin/PangolinDSOViewer.cpp)
 	set(HAS_PANGOLIN 1)
@@ -84,14 +106,14 @@ endif ()
 if (OpenCV_FOUND)
 	message("--- found OpenCV, compiling dso_opencv library.")
 	include_directories( ${OpenCV_INCLUDE_DIRS} )
-	set(dso_opencv_SOURCE_FILES 
+	set(dso_opencv_SOURCE_FILES
 	  ${PROJECT_SOURCE_DIR}/src/IOWrapper/OpenCV/ImageDisplay_OpenCV.cpp
 	  ${PROJECT_SOURCE_DIR}/src/IOWrapper/OpenCV/ImageRW_OpenCV.cpp)
 	set(HAS_OPENCV 1)
 else ()
 	message("--- could not find OpenCV, not compiling dso_opencv library.")
 	message("    this means there will be no image display, and image read / load functionality.")
-	set(dso_opencv_SOURCE_FILES 
+	set(dso_opencv_SOURCE_FILES
 	  ${PROJECT_SOURCE_DIR}/src/IOWrapper/ImageDisplay_dummy.cpp
 	  ${PROJECT_SOURCE_DIR}/src/IOWrapper/ImageRW_dummy.cpp)
 	set(HAS_OPENCV 0)
@@ -125,8 +147,16 @@ endif()
 if (OpenCV_FOUND AND Pangolin_FOUND)
 	message("--- compiling dso_dataset.")
 	add_executable(dso_dataset ${PROJECT_SOURCE_DIR}/src/main_dso_pangolin.cpp )
-    target_link_libraries(dso_dataset dso boost_system cxsparse ${BOOST_THREAD_LIBRARY} ${LIBZIP_LIBRARY} ${Pangolin_LIBRARIES} ${OpenCV_LIBS})
+    target_link_libraries(dso_dataset dso boost_system cxsparse ${BOOST_THREAD_LIBRARY} ${LIBZIP_LIBRARY} ${Pangolin_LIBRARIES} ${OpenCV_LIBS} )
 else()
 	message("--- not building dso_dataset, since either don't have openCV or Pangolin.")
 endif()
+
+enable_testing()
+
+target_link_libraries(
+  dso boost_system cxsparse ${BOOST_THREAD_LIBRARY} ${LIBZIP_LIBRARY} ${Pangolin_LIBRARIES} ${OpenCV_LIBS}
+  gtest_main
+)
+
 

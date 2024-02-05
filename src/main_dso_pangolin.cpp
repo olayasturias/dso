@@ -141,6 +141,28 @@ void settingsDefault(int preset)
 		setting_logStuff = false;
 	}
 
+	if(preset == 4)
+	{
+		printf("DEFAULT settings:\n"
+				"- %s real-time enforcing\n"
+				"- 800 active points\n"
+				"- 5-7 active frames\n"
+				"- 1-6 LM iteration each KF\n"
+				"- original image resolution\n", preset==0 ? "no " : "1x");
+
+		playbackSpeed = (preset==0 ? 0 : 1);
+		preload = preset==1;
+		setting_desiredImmatureDensity = 600;
+		setting_desiredPointDensity = 800;
+		setting_minFrames = 4;
+		setting_maxFrames = 6;
+		setting_maxOptIterations=15;
+		setting_minOptIterations=1;
+
+		setting_logStuff = false;
+	}
+
+
 	printf("==============================================\n");
 }
 

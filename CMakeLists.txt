@@ -46,8 +46,9 @@ endif()
 
 add_definitions("-DENABLE_SSE")
 set(CMAKE_CXX_FLAGS
-   "${SSE_FLAGS} -O3 -g -std=c++0x ${CPU_CXX_FLAG}"
-#   "${SSE_FLAGS} -O3 -g -std=c++0x -fno-omit-frame-pointer"
+  "${SSE_FLAGS} -O0 -g -std=c++0x ${CPU_CXX_FLAG}" # not optimized (debugging)
+  #  "${SSE_FLAGS} -O3 -g -std=c++0x ${CPU_CXX_FLAG}" # optimized
+#   "${SSE_FLAGS} -O3 -g -std=c++0x -fno-omit-frame-pointer" #idk
 )
 
 if (MSVC)
